@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+#
+# check-css-tokens — ověří sémantickou CSS token vrstvu (N1, N3).
+#
+# Použití:
+#   core/bin/check-css-tokens
+#
+# Dvě kontroly:
+#   a) každé jméno z css-tokens-contract.txt musí být definované
+#      v resources/css/app.css (kontroluje se jen existence, ne hodnota)
+#   b) žádný soubor v resources/views/public/**/*.blade.php nesmí
+#      obsahovat natvrdo psaný hex kód — jen var(--color-*)
+#
+# Exit 0  — obě kontroly v pořádku.
+# Exit 1  — nalezeny chybějící tokeny nebo natvrdo psané hex kódy (viz níže).
+
+set -euo pipefail
+
+# Skript má dvě různé báze a nesmí je slévat: kontrakt (jména tokenů) je
+# jádro a leží v core/, kdežto kontrolovaný obsah (hodnoty v app.css a
+# Blade views) je per-web a leží v rootu repa.
+CORE_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." >/dev/null 2>&1 && pwd)"
+APP_ROOT="$(cd -- "$CORE_ROOT/.." >/dev/null 2>&1 && pwd)"
+CONTRACT="$CORE_ROOT/css-tokens-contract.txt"
+APP_CSS="$APP_ROOT/resources/css/app.css"
+VIEWS_DIR="$APP_ROOT/resources/views/public"
+
+if [ ! -f "$CONTRACT" ]; then
+    echo "check-css-tokens: kontrakt nenalezen: $CONTRACT" >&2
+    exit 1
+fi
+
+if [ ! -f "$APP_CSS" ]; then
+    echo "check-css-tokens: app.css nenalezen: $APP_CSS" >&2
+    exit 1
+fi
+
+echo "check-css-tokens: jádro:       $CORE_ROOT"
+echo "check-css-tokens: web:         $APP_ROOT"
+echo "check-css-tokens: kontrakt:    $CONTRACT"
+echo "check-css-tokens: app.css:     $APP_CSS"
+echo
+
+status=0
+
+# --- (a) každé jméno z kontraktu musí existovat v app.css ---
+
+checked_tokens=0
+missing_tokens=0
+
+while IFS= read -r raw_name || [ -n "$raw_name" ]; do
+    name="${raw_name%%$'\r'}"
+    name="${name#"${name%%[![:space:]]*}"}"
+    name="${name%"${name##*[![:space:]]}"}"
+
+    [ -z "$name" ] && continue
+    case "$name" in
+        \#*) continue ;;
+    esac
+
+    checked_tokens=$((checked_tokens + 1))
+
+    if ! grep -qF -- "$name:" "$APP_CSS"; then
+        echo "=== CHYBÍ v app.css: $name ==="
+        status=1
+        missing_tokens=$((missing_tokens + 1))
+    fi
+done < "$CONTRACT"
+
+if [ "$missing_tokens" -eq 0 ]; then
+    echo "check-css-tokens: (a) OK — všech $checked_tokens tokenů z kontraktu je v app.css definovaných."
+else
+    echo "check-css-tokens: (a) CHYBÍ $missing_tokens z $checked_tokens tokenů z kontraktu (viz výše)."
+fi
+
+echo
+
+# --- (b) žádný natvrdo psaný hex kód v resources/views/public/**/*.blade.php ---
+
+hex_hits=0
+
+if [ -d "$VIEWS_DIR" ]; then
+    while IFS=: read -r file line match; do
+        [ -z "$file" ] && continue
+        echo "=== HEX NALEZEN: ${file#"$APP_ROOT"/}:$line: $match ==="
+        status=1
+        hex_hits=$((hex_hits + 1))
+    done < <(grep -rnoE '#[0-9a-fA-F]{3,8}' "$VIEWS_DIR" --include='*.blade.php' 2>/dev/null || true)
+fi
+
+if [ "$hex_hits" -eq 0 ]; then
+    echo "check-css-tokens: (b) OK — žádný natvrdo psaný hex kód v resources/views/public/**/*.blade.php."
+else
+    echo "check-css-tokens: (b) NALEZENO $hex_hits natvrdo psaných hex kódů (viz výše)."
+fi
+
+exit $status
