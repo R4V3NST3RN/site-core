@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\TrainerResource\Pages;
-use App\Filament\Resources\TrainerResource\RelationManagers;
 use App\Models\Trainer;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -24,55 +23,55 @@ class TrainerResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Section::make('Basic Information')
-                ->schema([
-                    Forms\Components\TextInput::make('first_name')
-                        ->required()
-                        ->maxLength(255),
+                    ->schema([
+                        Forms\Components\TextInput::make('first_name')
+                            ->required()
+                            ->maxLength(255),
 
-                    Forms\Components\TextInput::make('last_name')
-                        ->required()
-                        ->maxLength(255),
+                        Forms\Components\TextInput::make('last_name')
+                            ->required()
+                            ->maxLength(255),
 
-                    Forms\Components\FileUpload::make('photo')
-                        ->label('Fotka trenéra')
-                        ->image()
-                        ->acceptedFileTypes(['image/png', 'image/webp'])
-                        ->directory('trainers')
-                        ->helperText('Nahrajte PNG nebo WebP s průhledným pozadím (bez pozadí). Doporučená výška: min. 400 px.')
-                        ->columnSpanFull(),
+                        Forms\Components\FileUpload::make('photo')
+                            ->label('Fotka trenéra')
+                            ->image()
+                            ->acceptedFileTypes(['image/png', 'image/webp'])
+                            ->directory('trainers')
+                            ->helperText('Nahrajte PNG nebo WebP s průhledným pozadím (bez pozadí). Doporučená výška: min. 400 px.')
+                            ->columnSpanFull(),
 
-                    Forms\Components\Toggle::make('is_active')
-                        ->default(true),
-                ])
-                ->columns(2),
+                        Forms\Components\Toggle::make('is_active')
+                            ->default(true),
+                    ])
+                    ->columns(2),
 
-            Forms\Components\Section::make('Contact Information')
-                ->schema([
-                    Forms\Components\TextInput::make('email')
-                        ->email()
-                        ->maxLength(255),
+                Forms\Components\Section::make('Contact Information')
+                    ->schema([
+                        Forms\Components\TextInput::make('email')
+                            ->email()
+                            ->maxLength(255),
 
-                    Forms\Components\TextInput::make('phone')
-                        ->tel()
-                        ->maxLength(255),
-                ])
-                ->columns(2),
+                        Forms\Components\TextInput::make('phone')
+                            ->tel()
+                            ->maxLength(255),
+                    ])
+                    ->columns(2),
 
-            Forms\Components\Section::make('Professional Information')
-                ->schema([
-                    Forms\Components\TextInput::make('specialization')
-                        ->maxLength(255)
-                        ->placeholder('e.g., Gymnastics for children, Acrobatics'),
+                Forms\Components\Section::make('Professional Information')
+                    ->schema([
+                        Forms\Components\TextInput::make('specialization')
+                            ->maxLength(255)
+                            ->placeholder('e.g., Gymnastics for children, Acrobatics'),
 
-                    Forms\Components\Textarea::make('bio')
-                        ->rows(5)
-                        ->columnSpanFull(),
+                        Forms\Components\Textarea::make('bio')
+                            ->rows(5)
+                            ->columnSpanFull(),
 
-                    Forms\Components\TextInput::make('order')
-                        ->numeric()
-                        ->default(0)
-                        ->helperText('Lower numbers appear first'),
-                ]),
+                        Forms\Components\TextInput::make('order')
+                            ->numeric()
+                            ->default(0)
+                            ->helperText('Lower numbers appear first'),
+                    ]),
             ]);
     }
 
@@ -80,33 +79,33 @@ class TrainerResource extends Resource
     {
         return $table
             ->columns([
-              Tables\Columns\ImageColumn::make('photo')
-                ->circular(),
+                Tables\Columns\ImageColumn::make('photo')
+                    ->circular(),
 
-            Tables\Columns\TextColumn::make('first_name')
-                ->searchable()
-                ->sortable(),
+                Tables\Columns\TextColumn::make('first_name')
+                    ->searchable()
+                    ->sortable(),
 
-            Tables\Columns\TextColumn::make('last_name')
-                ->searchable()
-                ->sortable(),
+                Tables\Columns\TextColumn::make('last_name')
+                    ->searchable()
+                    ->sortable(),
 
-            Tables\Columns\TextColumn::make('specialization')
-                ->searchable()
-                ->limit(30),
+                Tables\Columns\TextColumn::make('specialization')
+                    ->searchable()
+                    ->limit(30),
 
-            Tables\Columns\IconColumn::make('is_active')
-                ->boolean()
-                ->sortable(),
+                Tables\Columns\IconColumn::make('is_active')
+                    ->boolean()
+                    ->sortable(),
 
-            Tables\Columns\TextColumn::make('order')
-                ->numeric()
-                ->sortable(),
+                Tables\Columns\TextColumn::make('order')
+                    ->numeric()
+                    ->sortable(),
 
-            Tables\Columns\TextColumn::make('created_at')
-                ->dateTime()
-                ->sortable()
-                ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ]);
     }
 

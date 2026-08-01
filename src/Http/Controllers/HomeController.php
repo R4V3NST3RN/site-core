@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Course;
 use App\Models\Article;
+use App\Models\Course;
 use App\Models\Trainer;
 
 class HomeController extends Controller
@@ -29,4 +29,3 @@ class HomeController extends Controller
         return view('public.home', compact('featuredCourses', 'latestArticles', 'trainers'));
     }
 }
-

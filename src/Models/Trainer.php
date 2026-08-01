@@ -28,7 +28,7 @@ class Trainer extends Model
         parent::boot();
         static::creating(function ($trainer) {
             if (empty($trainer->slug)) {
-                $trainer->slug = Str::slug($trainer->first_name . ' ' . $trainer->last_name);
+                $trainer->slug = Str::slug($trainer->first_name.' '.$trainer->last_name);
             }
         });
     }

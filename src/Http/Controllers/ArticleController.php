@@ -13,7 +13,7 @@ class ArticleController extends Controller
         $articles = Article::where('status', 'published')
             ->with('user')
             ->get()
-            ->map(fn($a) => [
+            ->map(fn ($a) => [
                 'type' => 'article',
                 'item' => $a,
                 'date' => $a->published_at ?? $a->created_at,
@@ -22,7 +22,7 @@ class ArticleController extends Controller
         $courses = Course::where('status', 'active')
             ->with(['courseType', 'trainer'])
             ->get()
-            ->map(fn($c) => [
+            ->map(fn ($c) => [
                 'type' => 'course',
                 'item' => $c,
                 'date' => $c->created_at,

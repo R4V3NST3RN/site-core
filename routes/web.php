@@ -1,12 +1,12 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseTypeController;
-use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\TrainerController;
-use App\Http\Controllers\ContactController;
+use Illuminate\Support\Facades\Route;
 
 // Veřejný frontend
 Route::get('/', [HomeController::class, 'index'])->name('home');

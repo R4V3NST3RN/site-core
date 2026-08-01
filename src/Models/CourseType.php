@@ -37,6 +37,7 @@ class CourseType extends Model
         if ($this->is_for_children && $this->age_category) {
             return "{$this->name} ({$this->age_category})";
         }
+
         return $this->name;
     }
 }

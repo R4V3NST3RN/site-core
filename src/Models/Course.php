@@ -58,27 +58,27 @@ class Course extends Model
     public function generateAutoTitle(): string
     {
         $parts = [];
-        
+
         // Typ kurzu (s věkovou kategorií pokud je pro děti)
         if ($this->courseType) {
             $parts[] = $this->courseType->full_name;
         }
-        
+
         // Trenér
         if ($this->trainer) {
             $parts[] = "vede {$this->trainer->full_name}";
         }
-        
+
         // Den a denní doba
         if ($this->day_of_week && $this->time_of_day) {
             $parts[] = "{$this->day_of_week} {$this->time_of_day}";
         }
-        
+
         // Měsíce a rok
         if ($this->months && $this->year) {
             $parts[] = "{$this->months} {$this->year}";
         }
-        
+
         return implode(', ', $parts);
     }
 }

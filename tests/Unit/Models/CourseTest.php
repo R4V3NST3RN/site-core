@@ -48,14 +48,14 @@ class CourseTest extends TestCase
             'is_featured',
         ];
 
-        $course = new Course();
+        $course = new Course;
 
         $this->assertEqualsCanonicalizing($expected, $course->getFillable());
     }
 
     public function test_fillable_attributes_count_matches_definition(): void
     {
-        $course = new Course();
+        $course = new Course;
 
         // Charakterizační test proti počtu položek – hlídá, že někdo omylem
         // nepřidá/nesmaže položku bez úpravy testu výše.
@@ -64,7 +64,7 @@ class CourseTest extends TestCase
 
     public function test_mass_assignment_ignores_non_fillable_attributes(): void
     {
-        $course = new Course();
+        $course = new Course;
 
         $course->fill([
             'day_of_week' => 'pondělí',
@@ -82,7 +82,7 @@ class CourseTest extends TestCase
 
     public function test_mass_assignment_accepts_every_declared_fillable_attribute(): void
     {
-        $course = new Course();
+        $course = new Course;
 
         $payload = [
             'course_type_id' => 1,
@@ -126,7 +126,7 @@ class CourseTest extends TestCase
      */
     public function test_generate_auto_title_uses_first_case_for_trainer_name(): void
     {
-        $course = new Course();
+        $course = new Course;
         $course->setRelation('trainer', new Trainer([
             'first_name' => 'Marcus',
             'last_name' => 'Vlk',

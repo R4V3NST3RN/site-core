@@ -10,7 +10,7 @@ class CourseController extends Controller
     public function index()
     {
         $courseTypes = CourseType::where('is_active', true)
-            ->withCount(['courses' => fn($q) => $q->where('status', 'active')])
+            ->withCount(['courses' => fn ($q) => $q->where('status', 'active')])
             ->orderBy('order')
             ->get();
 
