@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use App\Models\Course;
+use App\Models\Faq;
 use App\Models\Trainer;
 
 class HomeController extends Controller
@@ -25,6 +26,10 @@ class HomeController extends Controller
             ->orderBy('order')
             ->get();
 
-        return view('public.home', compact('featuredCourses', 'latestArticles', 'trainers'));
+        $faqs = Faq::where('is_active', true)
+            ->orderBy('order')
+            ->get();
+
+        return view('public.home', compact('featuredCourses', 'latestArticles', 'trainers', 'faqs'));
     }
 }
