@@ -22,7 +22,7 @@ class HomeController extends Controller
             ->get();
 
         $trainers = Trainer::where('is_active', true)
-            ->orderBy('first_name')
+            ->orderBy('order')
             ->get();
 
         return view('public.home', compact('featuredCourses', 'latestArticles', 'trainers'));

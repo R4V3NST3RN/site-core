@@ -10,7 +10,7 @@ class TrainerController extends Controller
     public function index()
     {
         $trainers = Trainer::where('is_active', true)
-            ->orderBy('first_name')
+            ->orderBy('order')
             ->get();
 
         return view('public.trainers.index', compact('trainers'));
