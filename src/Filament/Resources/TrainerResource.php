@@ -37,6 +37,7 @@ class TrainerResource extends Resource
                             ->image()
                             ->acceptedFileTypes(['image/png', 'image/webp'])
                             ->directory('trainers')
+                            ->preserveFilenames()
                             ->helperText('Nahrajte PNG nebo WebP s průhledným pozadím (bez pozadí). Doporučená výška: min. 400 px.')
                             ->columnSpanFull(),
 
@@ -106,6 +107,9 @@ class TrainerResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                Tables\Filters\TrashedFilter::make(),
             ]);
     }
 

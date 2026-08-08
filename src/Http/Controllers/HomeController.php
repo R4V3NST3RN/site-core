@@ -22,8 +22,7 @@ class HomeController extends Controller
             ->get();
 
         $trainers = Trainer::where('is_active', true)
-            ->orderBy('order')
-            ->take(config('site.home.featured_trainers_count'))
+            ->orderBy('first_name')
             ->get();
 
         return view('public.home', compact('featuredCourses', 'latestArticles', 'trainers'));

@@ -8,6 +8,8 @@
 --color-hero-overlay
 --color-highlight
 --color-ink
+# --color-status-active — zelená pro stavové štítky "aktivní/nadcházející" (např. PROBÍHÁ, PŘIPRAVUJEME); obecné jméno, ne vázané na jedno místo použití
+--color-status-active
 --color-surface
 --color-surface-muted
 --color-surface-raised
