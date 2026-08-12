@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasTags;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Article extends Model
 {
+    use HasTags;
     use SoftDeletes;
 
     protected $fillable = [
@@ -14,6 +16,10 @@ class Article extends Model
         'slug',
         'perex',
         'content',
+        'blocks',
+        'template',
+        'category',
+        'tags',
         'featured_image',
         'user_id',
         'status',
@@ -22,6 +28,8 @@ class Article extends Model
 
     protected $casts = [
         'published_at' => 'datetime',
+        'blocks' => 'array',
+        'tags' => 'array',
     ];
 
     // Vztah - článek patří uživateli (autorovi)

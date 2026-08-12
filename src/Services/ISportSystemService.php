@@ -110,6 +110,15 @@ class ISportSystemService implements CourseSyncProvider
                 'total_spots' => $data['capacity'] ?? $course->total_spots,
                 'total_lessons' => $data['number_lessons'] ?? $course->total_lessons,
                 'price_per_lesson' => $data['price'] ?? $course->price_per_lesson,
+                // Termíny se ukládají SUROVÉ, tak jak přišly. Parsování
+                // (stamp -> datum a čas) patří až do renderu, ať je změna
+                // formátu API jen na jednom místě.
+                //
+                // Mapuje se výhradně 'terms'. Odpověď API nese i
+                // trainer_name a trainer_image, což jsou osobní údaje
+                // reálných trenérů — ty se na tenhle web ukládat NESMÍ,
+                // viz DECISIONS.md, sekce o reálné iSport API.
+                'terms' => $data['terms'] ?? $course->terms,
                 'last_synced_at' => now(),
             ]);
         } catch (\Exception $e) {

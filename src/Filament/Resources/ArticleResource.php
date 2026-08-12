@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Blocks\ContentBlocks;
 use App\Filament\Resources\ArticleResource\Pages;
 use App\Models\Article;
+use App\Support\ContentTags;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -55,12 +57,41 @@ class ArticleResource extends Resource
                     ->default('draft')
                     ->required(),
 
+                Forms\Components\Select::make('category')
+                    ->label('Sekce')
+                    // Číselník je brand-specifický, proto per-web config.
+                    // Uložená hodnota mimo číselník se doplní jako volba,
+                    // aby ji formulář při uložení tiše nezahodil.
+                    ->options(fn (?Article $record): array => collect(config('site.content.article_categories', []))
+                        ->merge(filled($record?->category) ? [$record->category] : [])
+                        ->unique()
+                        ->sort()
+                        ->mapWithKeys(fn (string $category): array => [$category => $category])
+                        ->all())
+                    ->searchable()
+                    ->native(false),
+
+                Forms\Components\TagsInput::make('tags')
+                    ->label('Tagy')
+                    // Closure, ne pole — suggestions() se vyhodnocuje až
+                    // při renderu, takže nabídka roste, jak přibývají tagy.
+                    ->suggestions(fn (): array => ContentTags::suggestions())
+                    ->helperText('Velikost písmen a mezery se sjednotí při uložení.')
+                    ->columnSpanFull(),
+
                 Forms\Components\DateTimePicker::make('published_at'),
 
                 Forms\Components\Select::make('user_id')
                     ->relationship('user', 'name')
                     ->required()
                     ->default(auth()->id()),
+
+                Forms\Components\Builder::make('blocks')
+                    ->label('Blokový obsah')
+                    ->helperText('Nepovinné. Pokud zůstane prázdné, vykreslí se pole Content výše.')
+                    ->blocks(ContentBlocks::all())
+                    ->collapsible()
+                    ->columnSpanFull(),
             ]);
     }
 

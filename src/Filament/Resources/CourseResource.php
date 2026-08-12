@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Blocks\ContentBlocks;
 use App\Filament\Resources\CourseResource\Pages;
 use App\Models\Course;
+use App\Support\ContentTags;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -150,6 +152,38 @@ class CourseResource extends Resource
                     ])
                     ->columns(2),
 
+                Forms\Components\Section::make('Obsah příspěvku')
+                    ->schema([
+                        Forms\Components\Textarea::make('perex')
+                            ->label('Perex')
+                            ->rows(3)
+                            ->columnSpanFull(),
+
+                        Forms\Components\FileUpload::make('featured_image')
+                            ->label('Hlavní obrázek')
+                            ->image()
+                            ->disk('public')
+                            ->directory('blocks')
+                            ->preserveFilenames()
+                            ->columnSpanFull(),
+
+                        Forms\Components\TagsInput::make('tags')
+                            ->label('Tagy')
+                            // Našeptávání sjednocuje tagy z článků i kurzů,
+                            // ať nevznikne "Dojo" a "dojo" vedle sebe.
+                            ->suggestions(fn (): array => ContentTags::suggestions())
+                            ->helperText('Velikost písmen a mezery se sjednotí při uložení.')
+                            ->columnSpanFull(),
+
+                        Forms\Components\Builder::make('blocks')
+                            ->label('Blokový obsah')
+                            ->blocks(ContentBlocks::all(Course::class))
+                            ->collapsible()
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(1)
+                    ->collapsible(),
+
                 Forms\Components\Section::make('Kapacita')
                     ->schema([
                         Forms\Components\TextInput::make('total_spots')
@@ -221,7 +255,7 @@ class CourseResource extends Resource
                     ->schema([
                         Forms\Components\TextInput::make('external_sync_id')
                             ->label('Externí ID')
-                            ->helperText('ID kurzu v externím rezervačním systému. Prázdné = kurz se nesynchronizuje.')
+                            ->helperText('ID kurzu v externím rezervačním systému. Když zůstane prázdné, kurz se nesynchronizuje a na webu u něj nebude tlačítko pro přihlášení — návštěvník se dostane jen na seznam všech kurzů v systému.')
                             ->maxLength(255),
 
                         Forms\Components\Placeholder::make('last_synced_at')

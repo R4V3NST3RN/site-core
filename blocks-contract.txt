@@ -1,0 +1,71 @@
+# blocks-contract.txt
+#
+# Strojově čitelný seznam bloků redakčního obsahu (Filament Builder) a
+# jejich polí. Zdroj pravdy pro definici je
+# core/src/Filament/Blocks/ContentBlocks.php — tenhle soubor drží jen
+# jména, aby se dala číst bez PHP.
+#
+# Formát: jeden blok na řádek jako
+#   nazev_bloku: pole[typ,povinnost] pole[typ,povinnost]
+# Prázdné řádky a řádky začínající # se ignorují.
+#
+# (a) NÁZVY BLOKŮ JSOU KONTRAKT MEZI core/ A PER-WEB resources/views/.
+#     Data ukládá jádro, vykresluje je per-web renderer
+#     (resources/views/public/blocks/_renderer.blade.php), který podle
+#     názvu bloku includuje partial stejného jména — podtržítka v názvu
+#     bloku odpovídají pomlčkám v názvu souboru (rich_text ->
+#     rich-text.blade.php). Přidání bloku v core/ proto vyžaduje
+#     doplnit partial v KAŽDÉM webu, který jádro konzumuje
+#     (shinobi-laravel, gymnastikaprovsechny); jinak se blok mimo
+#     produkci vypíše jako viditelné varování a v produkci se tiše
+#     přeskočí. Přejmenování bloku nebo pole je breaking change pro
+#     všechna už uložená data — dělá se s migrací obsahu, ne jen tady.
+#
+# (b) SOUBOR JE ZÁROVEŇ SPECIFIKACE PRO AI AGENTY GENERUJÍCÍ OBSAH
+#     (role redaktor). Agent smí skládat obsah výhradně z bloků a polí
+#     uvedených níže, v tomto tvaru:
+#       [{"type": "nazev_bloku", "data": {"pole": "hodnota"}}, ...]
+#     Schéma je záměrně ploché — žádné vnořené Buildery ani Repeatery,
+#     hodnoty jsou skaláry. Pole typu image je vždy nepovinné: agent
+#     obrázek nenahrává a renderer takový blok vysází jen s textem přes
+#     plnou šířku. Pole typu html přijímá jednoduché formátování z
+#     RichEditoru (p, strong, em, ul/ol, a, h2/h3). Pole typu string
+#     s názvem url je prostý text bez validace formátu — smí být
+#     absolutní URL, relativní cesta (/kontakt) nebo mailto:.
+
+heading:       text[string,required]
+rich_text:     content[html,required]
+text_image:    content[html,optional] image[image,optional]
+image_text:    content[html,optional] image[image,optional]
+divider:       (bez polí)
+button_single: label[string,required] url[string,required]
+button_double: label_1[string,required] url_1[string,required] label_2[string,required] url_2[string,required]
+icon_list:     items[repeater,required] -> icon[string,optional] text[string,required]
+course_info:   course_id[id:Course,required]
+trainer:       trainer_id[id:Trainer,required]
+
+# text_image a image_text mají shodné schéma, liší se jen renderem:
+# text_image = text vlevo / obrázek vpravo, image_text = obráceně.
+# Díky tomu jde blok mezi variantami přepnout bez migrace dat.
+
+# button_double má ZÁMĚRNĚ ploché label_1/url_1/label_2/url_2 místo
+# Repeateru se dvěma položkami — viz plochost schématu v (b) výše.
+
+# icon_list — POZNÁMKA: jediný blok s Repeaterem, ne plochými poli. Pro
+# AI agenty generující obsah to znamená o úroveň vnoření navíc oproti
+# ostatním blokům. Při návrhu/úpravě agenta na psaní blogu tomu věnuj
+# zvláštní pozornost — buď ho naučit repeater strukturu, nebo tento
+# blok z jeho výstupu vynechat.
+
+# course_info a trainer jsou DATOVÉ bloky — nenesou obsah, jen ID
+# odkazovaného modelu. Schéma je ploché jako u textových bloků, ale
+# POŽADAVEK NA AI AGENTA JE JINÉ TŘÍDY: hodnota není text, který si
+# agent vymyslí, ale ID, které MUSÍ existovat v databázi. Agent, který
+# tyhle bloky generuje, si proto nejdřív musí platná ID vyhledat
+# (aktivní kurzy: courses.status = 'active'; aktivní trenéři:
+# trainers.is_active = 1) a nesmí je halucinovat — neexistující ani
+# soft-deleted ID renderer tiše přeskočí a na stránce nebude nic.
+#
+# course_info navíc mění chování podle toho, čí formulář ho hostí:
+# v článku je course_id ruční Select, v kurzu je skryté a drží ID
+# právě editovaného kurzu (ContentBlocks::all(Course::class)).
