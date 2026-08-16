@@ -60,6 +60,14 @@ class CourseResource extends Resource
                             ->default('draft')
                             ->required(),
 
+                        // Nový záznam dostane aktuální datum a čas, ať se
+                        // nestane, že kurz zůstane s prázdným published_at
+                        // a filtr na veřejném webu ho skryje, aniž by o tom
+                        // redaktor věděl.
+                        Forms\Components\DateTimePicker::make('published_at')
+                            ->label('Datum publikace')
+                            ->default(now()),
+
                         Forms\Components\Toggle::make('is_featured')
                             ->label('Zvýrazněný kurz'),
                     ])
@@ -310,6 +318,11 @@ class CourseResource extends Resource
                 Tables\Columns\IconColumn::make('is_featured')
                     ->label('Zvýrazněný')
                     ->boolean(),
+
+                Tables\Columns\TextColumn::make('published_at')
+                    ->label('Datum publikace')
+                    ->dateTime()
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

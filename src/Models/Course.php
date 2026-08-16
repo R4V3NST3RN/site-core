@@ -38,10 +38,12 @@ class Course extends Model
         'slug',
         'auto_title',
         'status',
+        'published_at',
         'is_featured',
     ];
 
     protected $casts = [
+        'published_at' => 'datetime',
         'start_time' => 'datetime',
         'end_time' => 'datetime',
         'last_synced_at' => 'datetime',

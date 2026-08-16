@@ -79,7 +79,12 @@ class ArticleResource extends Resource
                     ->helperText('Velikost písmen a mezery se sjednotí při uložení.')
                     ->columnSpanFull(),
 
-                Forms\Components\DateTimePicker::make('published_at'),
+                // Nový záznam dostane aktuální datum a čas, ať se nestane,
+                // že článek zůstane s prázdným published_at a filtr na
+                // veřejném webu ho skryje, aniž by o tom redaktor věděl.
+                Forms\Components\DateTimePicker::make('published_at')
+                    ->label('Datum publikace')
+                    ->default(now()),
 
                 Forms\Components\Select::make('user_id')
                     ->relationship('user', 'name')
@@ -116,6 +121,7 @@ class ArticleResource extends Resource
                     }),
 
                 Tables\Columns\TextColumn::make('published_at')
+                    ->label('Datum publikace')
                     ->dateTime()
                     ->sortable(),
 

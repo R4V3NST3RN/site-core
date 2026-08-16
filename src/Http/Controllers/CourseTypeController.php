@@ -15,6 +15,7 @@ class CourseTypeController extends Controller
 
         $courses = Course::where('course_type_id', $courseType->id)
             ->where('status', 'active')
+            ->where('published_at', '<=', now())
             ->with(['trainer', 'courseType'])
             ->orderBy('start_time')
             ->get();
