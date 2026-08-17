@@ -10,8 +10,14 @@ class ArticleController extends Controller
 {
     public function index()
     {
-        $articles = Article::where('status', 'published')
-            ->where('published_at', '<=', now())
+        // Prázdný řetězec z ?sekce= se chová jako nevyplněný filtr, ne jako
+        // sekce se jménem "" — jinak by odkaz s useknutou hodnotou vrátil
+        // prázdný výpis místo celého feedu.
+        $section = trim((string) request()->query('sekce', ''));
+        $section = $section === '' ? null : $section;
+
+        $articles = Article::published()
+            ->when($section, fn ($q) => $q->where('category', $section))
             ->with('user')
             ->get()
             ->map(fn ($a) => [
@@ -20,15 +26,19 @@ class ArticleController extends Controller
                 'date' => $a->published_at,
             ]);
 
-        $courses = Course::where('status', 'active')
-            ->where('published_at', '<=', now())
-            ->with(['courseType', 'trainer'])
-            ->get()
-            ->map(fn ($c) => [
-                'type' => 'course',
-                'item' => $c,
-                'date' => $c->published_at,
-            ]);
+        // Sekce je vlastnost článků; kurzy žádnou nemají, takže při zvolené
+        // sekci z feedu mizí celé. Míchat "sekce Akce" s kurzy by znamenalo
+        // tvrdit, že kurz do té sekce patří.
+        $courses = $section !== null
+            ? collect()
+            : Course::published()
+                ->with(['courseType', 'trainer'])
+                ->get()
+                ->map(fn ($c) => [
+                    'type' => 'course',
+                    'item' => $c,
+                    'date' => $c->published_at,
+                ]);
 
         // Tři kritéria, protože ani dvě nestačí na deterministické pořadí:
         // datum samo nerozliší příspěvky publikované ve stejnou sekundu
@@ -48,7 +58,7 @@ class ArticleController extends Controller
             ])
             ->values();
 
-        $perPage = 9;
+        $perPage = 10;
         $currentPage = request()->get('page', 1);
 
         $feed = new LengthAwarePaginator(
@@ -59,18 +69,16 @@ class ArticleController extends Controller
             ['path' => request()->url(), 'query' => request()->query()]
         );
 
-        return view('public.articles.index', compact('feed'));
+        return view('public.articles.index', compact('feed', 'section'));
     }
 
     public function show($slug)
     {
-        $article = Article::where('slug', $slug)
-            ->where('status', 'published')
-            ->where('published_at', '<=', now())
+        $article = Article::published()
+            ->where('slug', $slug)
             ->firstOrFail();
 
-        $related = Article::where('status', 'published')
-            ->where('published_at', '<=', now())
+        $related = Article::published()
             ->where('id', '!=', $article->id)
             ->latest('published_at')
             ->take(3)

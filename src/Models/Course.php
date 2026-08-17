@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\CourseEnrollmentState;
 use App\Models\Concerns\HasTags;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -54,6 +55,19 @@ class Course extends Model
         'price_per_course' => 'decimal:2',
         'price_per_lesson' => 'decimal:2',
     ];
+
+    /**
+     * Kurzy viditelné veřejnosti: aktivní a s datem, které už nastalo.
+     *
+     * Protějšek Article::published() — stav se jen jmenuje jinak ('active'
+     * místo 'published'), význam je stejný. Scope drží obě podmínky
+     * pohromadě, aby se nerozešly mezi controllery.
+     */
+    public function scopePublished(Builder $query): Builder
+    {
+        return $query->where('status', 'active')
+            ->where('published_at', '<=', now());
+    }
 
     // Vztahy
     public function courseType()

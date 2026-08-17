@@ -50,14 +50,25 @@ class CourseTypeResource extends Resource
                     ->columnSpanFull(),
 
                 Forms\Components\FileUpload::make('hero_image')
-                    ->label('Hero fotka')
+                    ->label('Hero fotka (záhlaví detailu)')
                     ->image()
                     ->directory('course_types')
                     ->imageResizeMode('cover')
                     ->imageCropAspectRatio('16:9')
                     ->imageResizeTargetWidth('1200')
                     ->imageResizeTargetHeight('675')
-                    ->helperText('Doporučená velikost: 1200×675 px, formát WebP nebo JPG')
+                    ->helperText('Široký pruh přes celou šířku detailu typu kurzu. Doporučená velikost: 1200×675 px, formát WebP nebo JPG')
+                    ->columnSpanFull(),
+
+                Forms\Components\FileUpload::make('list_image')
+                    ->label('Obrázek pro výpis kurzů')
+                    ->image()
+                    ->directory('course_types')
+                    ->imageResizeMode('cover')
+                    ->imageCropAspectRatio('3:4')
+                    ->imageResizeTargetWidth('900')
+                    ->imageResizeTargetHeight('1200')
+                    ->helperText('Portrét do svislé karty v přehledu kurzů — na výšku, ne na šířku jako hero fotka. Doporučená velikost: 900×1200 px, formát WebP nebo JPG')
                     ->columnSpanFull(),
 
                 Forms\Components\Toggle::make('is_for_children')

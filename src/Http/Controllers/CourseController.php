@@ -12,13 +12,11 @@ class CourseController extends Controller
         $courseTypes = CourseType::where('is_active', true)
             // Počet u typu musí sedět s tím, co návštěvník po rozkliknutí
             // uvidí — jinak by typ sliboval kurzy, které jsou ještě skryté.
-            ->withCount(['courses' => fn ($q) => $q->where('status', 'active')
-                ->where('published_at', '<=', now())])
+            ->withCount(['courses' => fn ($q) => $q->published()])
             ->orderBy('order')
             ->get();
 
-        $courses = Course::where('status', 'active')
-            ->where('published_at', '<=', now())
+        $courses = Course::published()
             ->with(['courseType', 'trainer'])
             ->orderBy('auto_title')
             ->paginate(12);
@@ -32,10 +30,9 @@ class CourseController extends Controller
             ->where('is_active', true)
             ->firstOrFail();
 
-        $course = Course::where('slug', $courseSlug)
+        $course = Course::published()
+            ->where('slug', $courseSlug)
             ->where('course_type_id', $courseType->id)
-            ->where('status', 'active')
-            ->where('published_at', '<=', now())
             ->with(['courseType', 'trainer'])
             ->firstOrFail();
 

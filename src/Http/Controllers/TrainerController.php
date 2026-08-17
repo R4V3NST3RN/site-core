@@ -22,9 +22,8 @@ class TrainerController extends Controller
             ->where('is_active', true)
             ->firstOrFail();
 
-        $courses = Course::where('trainer_id', $trainer->id)
-            ->where('status', 'active')
-            ->where('published_at', '<=', now())
+        $courses = Course::published()
+            ->where('trainer_id', $trainer->id)
             ->with('courseType')
             ->orderBy('start_time')
             ->get();

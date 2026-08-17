@@ -11,15 +11,13 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $featuredCourses = Course::where('status', 'active')
-            ->where('published_at', '<=', now())
+        $featuredCourses = Course::published()
             ->with(['courseType', 'trainer'])
             ->latest()
             ->take(6)
             ->get();
 
-        $latestArticles = Article::where('status', 'published')
-            ->where('published_at', '<=', now())
+        $latestArticles = Article::published()
             ->latest('published_at')
             ->take(3)
             ->get();

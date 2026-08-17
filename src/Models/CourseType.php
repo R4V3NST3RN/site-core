@@ -18,6 +18,7 @@ class CourseType extends Model
         'is_active',
         'order',
         'hero_image',
+        'list_image',
     ];
 
     protected $casts = [

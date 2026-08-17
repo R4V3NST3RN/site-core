@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasTags;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -31,6 +32,19 @@ class Article extends Model
         'blocks' => 'array',
         'tags' => 'array',
     ];
+
+    /**
+     * Obsah viditelný veřejnosti: publikovaný a s datem, které už nastalo.
+     *
+     * Obě podmínky patří k sobě — samotný status 'published' pustí ven
+     * i článek naplánovaný na příští týden. Scope je jedno místo, kde
+     * se ta dvojice drží, aby se nerozešla mezi controllery.
+     */
+    public function scopePublished(Builder $query): Builder
+    {
+        return $query->where('status', 'published')
+            ->where('published_at', '<=', now());
+    }
 
     // Vztah - článek patří uživateli (autorovi)
     public function user()
