@@ -19,6 +19,14 @@ class CourseTypeController extends Controller
             ->orderBy('start_time')
             ->get();
 
-        return view('public.course_types.show', compact('courseType', 'courses'));
+        // Galerie přiřazené tomuhle typu kurzu. Filtr published() musí být
+        // i tady — vazba sama nic o viditelnosti neříká, takže bez něj by
+        // se na veřejný web dostal koncept.
+        $galleries = $courseType->galleries()
+            ->published()
+            ->latest('published_at')
+            ->get();
+
+        return view('public.course_types.show', compact('courseType', 'courses', 'galleries'));
     }
 }

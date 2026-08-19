@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CourseType extends Model
@@ -30,6 +31,12 @@ class CourseType extends Model
     public function courses()
     {
         return $this->hasMany(Course::class);
+    }
+
+    // Vztah - galerie přiřazené k tomuto typu kurzu (M:N)
+    public function galleries(): BelongsToMany
+    {
+        return $this->belongsToMany(Gallery::class);
     }
 
     // Accessor - plný název (s věkovou kategorií, pokud je pro děti)

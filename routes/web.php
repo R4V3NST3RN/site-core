@@ -4,6 +4,7 @@ use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseTypeController;
+use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TrainerController;
@@ -25,6 +26,9 @@ Route::get('/'.config('site.routes.articles', 'clanky').'/{slug}', [ArticleContr
 
 Route::get('/'.config('site.routes.trainers'), [TrainerController::class, 'index'])->name('trainers.index');
 Route::get('/'.config('site.routes.trainers').'/{slug}', [TrainerController::class, 'show'])->name('trainers.show');
+
+Route::get('/'.config('site.routes.galleries', 'galerie'), [GalleryController::class, 'index'])->name('galleries.index');
+Route::get('/'.config('site.routes.galleries', 'galerie').'/{slug}', [GalleryController::class, 'show'])->name('galleries.show');
 
 Route::get('/'.config('site.routes.search', 'hledat'), [SearchController::class, 'index'])->name('search');
 

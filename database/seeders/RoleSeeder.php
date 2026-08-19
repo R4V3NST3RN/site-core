@@ -35,6 +35,7 @@ class RoleSeeder extends Seeder
         'course',
         'course::type',
         'faq',
+        'gallery',
         'trainer',
         'user',
     ];
@@ -145,6 +146,7 @@ class RoleSeeder extends Seeder
             'super_admin' => [
                 'article' => self::ACTIONS,
                 'faq' => self::ACTIONS,
+                'gallery' => self::ACTIONS,
                 'trainer' => self::ACTIONS,
                 'course' => self::ACTIONS,
                 'course::type' => self::ACTIONS,
@@ -156,6 +158,7 @@ class RoleSeeder extends Seeder
             'admin' => [
                 'article' => self::ACTIONS,
                 'faq' => self::ACTIONS,
+                'gallery' => self::ACTIONS,
                 'trainer' => self::ACTIONS,
                 'course' => self::ACTIONS,
                 'course::type' => self::ACTIONS,
@@ -167,6 +170,7 @@ class RoleSeeder extends Seeder
             'super_redaktor' => [
                 'article' => self::ACTIONS_WITHOUT_FORCE_DELETE,
                 'faq' => self::ACTIONS_WITHOUT_FORCE_DELETE,
+                'gallery' => self::ACTIONS_WITHOUT_FORCE_DELETE,
                 'trainer' => self::ACTIONS_WITHOUT_FORCE_DELETE,
                 'course' => self::ACTIONS_WITHOUT_FORCE_DELETE,
                 'course::type' => self::ACTIONS_WITHOUT_FORCE_DELETE,
@@ -177,6 +181,7 @@ class RoleSeeder extends Seeder
             'redaktor' => [
                 'article' => self::ARTICLE_WRITER,
                 'faq' => self::READ_ONLY,
+                'gallery' => self::READ_ONLY,
                 'trainer' => self::READ_ONLY,
                 'course' => self::READ_ONLY,
                 'course::type' => self::READ_ONLY,
