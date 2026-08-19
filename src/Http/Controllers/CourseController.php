@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use App\Models\CourseType;
+use App\Services\BlogFeed;
 
 class CourseController extends Controller
 {
+    public function __construct(private readonly BlogFeed $feed) {}
+
     public function index()
     {
         $courseTypes = CourseType::where('is_active', true)
@@ -36,6 +39,10 @@ class CourseController extends Controller
             ->with(['courseType', 'trainer'])
             ->firstOrFail();
 
-        return view('public.courses.show', compact('course'));
+        $related = $this->feed->related($course, 3);
+
+        ['previous' => $previous, 'next' => $next] = $this->feed->neighbours($course);
+
+        return view('public.courses.show', compact('course', 'related', 'previous', 'next'));
     }
 }

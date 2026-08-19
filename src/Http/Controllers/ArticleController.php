@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
-use App\Models\Course;
+use App\Services\BlogFeed;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class ArticleController extends Controller
 {
+    public function __construct(private readonly BlogFeed $feed) {}
+
     public function index()
     {
         // Prázdný řetězec z ?sekce= se chová jako nevyplněný filtr, ne jako
@@ -16,47 +18,7 @@ class ArticleController extends Controller
         $section = trim((string) request()->query('sekce', ''));
         $section = $section === '' ? null : $section;
 
-        $articles = Article::published()
-            ->when($section, fn ($q) => $q->where('category', $section))
-            ->with('user')
-            ->get()
-            ->map(fn ($a) => [
-                'type' => 'article',
-                'item' => $a,
-                'date' => $a->published_at,
-            ]);
-
-        // Sekce je vlastnost článků; kurzy žádnou nemají, takže při zvolené
-        // sekci z feedu mizí celé. Míchat "sekce Akce" s kurzy by znamenalo
-        // tvrdit, že kurz do té sekce patří.
-        $courses = $section !== null
-            ? collect()
-            : Course::published()
-                ->with(['courseType', 'trainer'])
-                ->get()
-                ->map(fn ($c) => [
-                    'type' => 'course',
-                    'item' => $c,
-                    'date' => $c->published_at,
-                ]);
-
-        // Tři kritéria, protože ani dvě nestačí na deterministické pořadí:
-        // datum samo nerozliší příspěvky publikované ve stejnou sekundu
-        // a id je per-tabulka, takže článek #7 a kurz #7 se shodným datem
-        // jsou v prvních dvou kritériích nerozlišitelné a rozhodla by
-        // o nich databáze, která pořadí bez ORDER BY negarantuje. Typ to
-        // uzavírá — dvojice (datum, id, typ) je napříč feedem unikátní.
-        //
-        // Fallback na created_at tu schválně není. Do mapy se dostane jen
-        // obsah, který prošel filtrem published_at <= now(), takže 'date'
-        // nikdy není null a NULL větev by byla mrtvý kód.
-        $merged = $articles->concat($courses)
-            ->sortBy([
-                ['date', 'desc'],
-                ['item.id', 'desc'],
-                ['type', 'desc'],
-            ])
-            ->values();
+        $merged = $this->feed->entries($section);
 
         $perPage = 10;
         $currentPage = request()->get('page', 1);
@@ -78,12 +40,10 @@ class ArticleController extends Controller
             ->where('slug', $slug)
             ->firstOrFail();
 
-        $related = Article::published()
-            ->where('id', '!=', $article->id)
-            ->latest('published_at')
-            ->take(3)
-            ->get();
+        $related = $this->feed->related($article, 3);
 
-        return view('public.articles.show', compact('article', 'related'));
+        ['previous' => $previous, 'next' => $next] = $this->feed->neighbours($article);
+
+        return view('public.articles.show', compact('article', 'related', 'previous', 'next'));
     }
 }

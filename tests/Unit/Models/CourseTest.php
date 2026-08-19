@@ -21,6 +21,11 @@ class CourseTest extends TestCase
      * app/Models/Course.php. Pokud se tento test rozbije po úpravě modelu,
      * je to signál, že se změnila veřejná mass-assignment plocha modelu
      * a je potřeba to reflektovat i jinde (Form Requesty, Filament resource).
+     *
+     * Seznam je schválně vyjmenovaný celý, ne jen namátkou klíčová pole:
+     * fillable je bezpečnostní plocha (Course plní i sync z cizího API),
+     * takže každý přírůstek má projít vědomým schválením. Kontrola na
+     * pouhou přítomnost pár polí by nový sloupec propustila mlčky.
      */
     public function test_has_expected_fillable_attributes(): void
     {
@@ -34,6 +39,11 @@ class CourseTest extends TestCase
             'months',
             'year',
             'description',
+            'blocks',
+            'terms',
+            'tags',
+            'perex',
+            'featured_image',
             'total_lessons',
             'remaining_lessons',
             'price_per_course',
@@ -45,21 +55,13 @@ class CourseTest extends TestCase
             'slug',
             'auto_title',
             'status',
+            'published_at',
             'is_featured',
         ];
 
         $course = new Course;
 
         $this->assertEqualsCanonicalizing($expected, $course->getFillable());
-    }
-
-    public function test_fillable_attributes_count_matches_definition(): void
-    {
-        $course = new Course;
-
-        // Charakterizační test proti počtu položek – hlídá, že někdo omylem
-        // nepřidá/nesmaže položku bez úpravy testu výše.
-        $this->assertCount(21, $course->getFillable());
     }
 
     public function test_mass_assignment_ignores_non_fillable_attributes(): void
@@ -94,6 +96,11 @@ class CourseTest extends TestCase
             'months' => 'září-prosinec',
             'year' => 2026,
             'description' => 'Testovací popis kurzu',
+            'blocks' => [['type' => 'rich_text', 'data' => ['content' => 'Blok']]],
+            'terms' => [['stamp' => '1790000000']],
+            'tags' => ['Dojo'],
+            'perex' => 'Krátký perex kurzu',
+            'featured_image' => 'courses/nahled.webp',
             'total_lessons' => 12,
             'remaining_lessons' => 12,
             'price_per_course' => 1500,
@@ -105,6 +112,7 @@ class CourseTest extends TestCase
             'slug' => 'testovaci-kurz',
             'auto_title' => 'Testovací kurz',
             'status' => 'active',
+            'published_at' => '2026-07-01 08:00:00',
             'is_featured' => true,
         ];
 
