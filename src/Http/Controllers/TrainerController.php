@@ -13,7 +13,9 @@ class TrainerController extends Controller
             ->orderBy('order')
             ->get();
 
-        return view('public.trainers.index', compact('trainers'));
+        $partner = $this->activePartner();
+
+        return view('public.trainers.index', compact('trainers', 'partner'));
     }
 
     public function show(string $slug)
@@ -28,6 +30,8 @@ class TrainerController extends Controller
             ->orderBy('start_time')
             ->get();
 
-        return view('public.trainers.show', compact('trainer', 'courses'));
+        $partner = $this->activePartner();
+
+        return view('public.trainers.show', compact('trainer', 'courses', 'partner'));
     }
 }

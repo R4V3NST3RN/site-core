@@ -37,6 +37,8 @@ class HomeController extends Controller
             ->where('show_on_homepage', true)
             ->first();
 
-        return view('public.home', compact('featuredCourses', 'latestArticles', 'trainers', 'faqs', 'homepageGallery'));
+        $partner = $this->activePartner();
+
+        return view('public.home', compact('featuredCourses', 'latestArticles', 'trainers', 'faqs', 'homepageGallery', 'partner'));
     }
 }

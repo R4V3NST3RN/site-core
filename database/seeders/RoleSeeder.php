@@ -36,6 +36,7 @@ class RoleSeeder extends Seeder
         'course::type',
         'faq',
         'gallery',
+        'partner',
         'trainer',
         'user',
     ];
@@ -114,7 +115,7 @@ class RoleSeeder extends Seeder
     }
 
     /**
-     * Založí všech 78 oprávnění, i ta, která žádná role z matice nedostane.
+     * Založí všech 102 oprávnění, i ta, která žádná role z matice nedostane.
      * Musí existovat, aby je Shield uměl nabídnout v administraci.
      */
     private function createPermissions(): void
@@ -147,6 +148,7 @@ class RoleSeeder extends Seeder
                 'article' => self::ACTIONS,
                 'faq' => self::ACTIONS,
                 'gallery' => self::ACTIONS,
+                'partner' => self::ACTIONS,
                 'trainer' => self::ACTIONS,
                 'course' => self::ACTIONS,
                 'course::type' => self::ACTIONS,
@@ -159,6 +161,7 @@ class RoleSeeder extends Seeder
                 'article' => self::ACTIONS,
                 'faq' => self::ACTIONS,
                 'gallery' => self::ACTIONS,
+                'partner' => self::ACTIONS,
                 'trainer' => self::ACTIONS,
                 'course' => self::ACTIONS,
                 'course::type' => self::ACTIONS,
@@ -171,6 +174,7 @@ class RoleSeeder extends Seeder
                 'article' => self::ACTIONS_WITHOUT_FORCE_DELETE,
                 'faq' => self::ACTIONS_WITHOUT_FORCE_DELETE,
                 'gallery' => self::ACTIONS_WITHOUT_FORCE_DELETE,
+                'partner' => self::ACTIONS_WITHOUT_FORCE_DELETE,
                 'trainer' => self::ACTIONS_WITHOUT_FORCE_DELETE,
                 'course' => self::ACTIONS_WITHOUT_FORCE_DELETE,
                 'course::type' => self::ACTIONS_WITHOUT_FORCE_DELETE,
@@ -182,6 +186,7 @@ class RoleSeeder extends Seeder
                 'article' => self::ARTICLE_WRITER,
                 'faq' => self::READ_ONLY,
                 'gallery' => self::READ_ONLY,
+                'partner' => self::READ_ONLY,
                 'trainer' => self::READ_ONLY,
                 'course' => self::READ_ONLY,
                 'course::type' => self::READ_ONLY,

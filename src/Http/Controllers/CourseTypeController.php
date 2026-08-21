@@ -27,6 +27,8 @@ class CourseTypeController extends Controller
             ->latest('published_at')
             ->get();
 
-        return view('public.course_types.show', compact('courseType', 'courses', 'galleries'));
+        $partner = $this->activePartner();
+
+        return view('public.course_types.show', compact('courseType', 'courses', 'galleries', 'partner'));
     }
 }
