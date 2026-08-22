@@ -77,12 +77,17 @@ class GalleryResource extends Resource
                     ->disk('public')
                     ->directory('galleries')
                     ->dehydrated(false)
+                    // FilePond pouští defaultně dva uploady souběžně. Každý z nich
+                    // si přečte 'photos', připíše svůj řádek a uloží celé pole zpátky
+                    // — takže si navzájem přepisují stav a řádky mizí. Sériově je to
+                    // pomalejší, ale deterministické.
+                    ->maxParallelUploads(1)
                     // Bez názvu galerie by z popisku zbylo holé "5/7", proto se
                     // pole otevře až s ním — 'title' je ->live(), překreslí se samo.
                     ->disabled(fn (Forms\Get $get): bool => blank($get('title')))
                     ->helperText(fn (Forms\Get $get): string => blank($get('title'))
                         ? 'Nejdřív vyplňte název galerie — popisky nahraných fotek se skládají z něj a z pořadí.'
-                        : 'Vyberte víc fotek najednou. Přidají se dolů mezi Fotky s předvyplněným popiskem, který tam můžete upravit.')
+                        : 'Vyberte víc fotek najednou. Přidají se dolů mezi Fotky a po uložení dostanou popisek podle názvu galerie a pořadí. Vlastní popisek můžete napsat rovnou — ten se nepřepisuje.')
                     ->afterStateUpdated(function (Forms\Components\FileUpload $component, Forms\Get $get, Forms\Set $set): void {
                         // Livewire drží čerstvě nahrané soubory jako dočasné;
                         // tohle je přesune na disk a nechá ve stavu cesty, se
@@ -97,14 +102,7 @@ class GalleryResource extends Resource
 
                         $photos = (array) $get('photos');
 
-                        // Počítá se jen řádek, který má fotku: Repeater začíná
-                        // s jedním prázdným (defaultItems), a ten by jinak první
-                        // dávku do nové galerie posunul na "2/4" místo "1/3".
-                        $offset = count(array_filter($photos, fn ($photo): bool => filled($photo['image'] ?? null)));
-                        $total = $offset + count($uploaded);
-                        $title = trim((string) $get('title'));
-
-                        foreach ($uploaded as $index => $path) {
+                        foreach ($uploaded as $path) {
                             // Klíč musí být uuid, jinak Repeater řádek nepozná.
                             // Připisujeme na konec, takže pořadí ani obsah
                             // stávajících řádků zůstává tak, jak si ho redaktor srovnal.
@@ -118,14 +116,15 @@ class GalleryResource extends Resource
                                 // Na řetězcovou cestu se to při ukládání dehydratuje samo,
                                 // takže v DB zůstává tvar beze změny.
                                 'image' => [(string) Str::uuid() => $path],
-                                'caption' => trim($title.' '.($offset + $index + 1).'/'.$total),
+                                // Popisek tu schválně zůstává prázdný. Tenhle callback
+                                // běží jednou za SOUBOR, ne za dávku — vidí vždy jen ten
+                                // svůj jeden a počet fotek v dávce nezná, takže by
+                                // jmenovatel nikdy nevyšel. Dopočítá ho Gallery::booted()
+                                // při ukládání, kde je celé pole 'photos' pohromadě.
+                                'caption' => '',
                             ];
                         }
 
-                        // Jmenovatel je počet fotek PO dávce, takže dřívější řádky
-                        // zůstanou s nižším ("4/4" vedle "5/7"). Nepřečíslováváme je
-                        // schválně: popisky si redaktor ručně upravuje a hromadný
-                        // přepis by mu tu práci pokaždé zahodil.
                         $set('photos', $photos);
 
                         // Bez vyprázdnění by se fotky z téhle dávky připsaly znovu

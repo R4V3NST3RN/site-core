@@ -52,6 +52,47 @@ class Gallery extends Model
                 ->where('show_on_homepage', true)
                 ->update(['show_on_homepage' => false]);
         });
+
+        // Číslování popisků patří sem, ne do formuláře. Hromadné nahrání volá
+        // svůj callback jednou za SOUBOR (FilePond posílá fotky po jedné), takže
+        // tam je počet fotek v dávce nezjistitelný a jmenovatel nikdy nesedl.
+        // Při ukládání je naopak celé pole 'photos' pohromadě, takže "i/N" vyjde
+        // správně. Jako u ostatních pravidel na modelu to navíc platí i pro
+        // seedery, tinker a agenty zakládající obsah mimo admin.
+        static::saving(function (self $gallery): void {
+            $photos = $gallery->photos;
+
+            if (blank($photos)) {
+                return;
+            }
+
+            $title = trim((string) $gallery->title);
+
+            // Bez názvu není z čeho popisek složit — holé "3/7" nikomu nepomůže,
+            // tak radši necháme prázdno a redaktor si doplní vlastní.
+            if ($title === '') {
+                return;
+            }
+
+            $position = 0;
+            $total = count($photos);
+
+            foreach ($photos as $key => $photo) {
+                $position++;
+
+                // Vyplněný popisek se NEPŘEPISUJE, ani při pozdějším přidání fotek.
+                // Redaktor si je ručně upravuje a hromadné přečíslování by mu tu
+                // práci pokaždé zahodilo; proto starší řádky zůstanou na "4/4",
+                // i když jich je mezitím šest.
+                if (filled($photo['caption'] ?? null)) {
+                    continue;
+                }
+
+                $photos[$key]['caption'] = $title.' '.$position.'/'.$total;
+            }
+
+            $gallery->photos = $photos;
+        });
     }
 
     /**
