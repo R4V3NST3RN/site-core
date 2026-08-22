@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Gallery;
 use App\Models\Partner;
+use App\Models\Trainer;
+use Illuminate\Database\Eloquent\Collection;
 
 abstract class Controller
 {
@@ -22,6 +25,43 @@ abstract class Controller
     {
         return Partner::published()
             ->where('is_active', true)
+            ->first();
+    }
+
+    /**
+     * Aktivní trenéři v pořadí, v jakém se mají zobrazit.
+     *
+     * Stejná úvaha jako u activePartner(): dotaz je společný, volba stránky
+     * zůstává na volajícím. Řazení podle 'order' drží ruční pořadí z adminu,
+     * takže se blok trenérů tváří všude stejně.
+     *
+     * $exceptId vynechá jednoho trenéra — na jeho vlastním detailu, aby se
+     * ve výpisu neopakoval ten, jehož profil návštěvník právě čte. Bez
+     * vyplněného id se nevynechává nikdo.
+     *
+     * @return Collection<int, Trainer>
+     */
+    protected function allTrainers(?int $exceptId = null): Collection
+    {
+        return Trainer::where('is_active', true)
+            ->when($exceptId !== null, fn ($query) => $query->whereKeyNot($exceptId))
+            ->orderBy('order')
+            ->get();
+    }
+
+    /**
+     * Galerie vybraná pro titulku — a nově i pro další stránky, které
+     * sdílený blok sekcí zobrazují.
+     *
+     * Příznak je výlučný (viz Gallery::booted()), takže first() vrací
+     * jedinou vybranou galerii, nebo null, když žádná vybraná není.
+     * published() tu musí být: samotný příznak o viditelnosti nic neříká,
+     * bez něj by se na web dostal koncept.
+     */
+    protected function homepageGallery(): ?Gallery
+    {
+        return Gallery::published()
+            ->where('show_on_homepage', true)
             ->first();
     }
 }

@@ -9,13 +9,13 @@ class TrainerController extends Controller
 {
     public function index()
     {
-        $trainers = Trainer::where('is_active', true)
-            ->orderBy('order')
-            ->get();
+        $trainers = $this->allTrainers();
+
+        $homepageGallery = $this->homepageGallery();
 
         $partner = $this->activePartner();
 
-        return view('public.trainers.index', compact('trainers', 'partner'));
+        return view('public.trainers.index', compact('trainers', 'homepageGallery', 'partner'));
     }
 
     public function show(string $slug)
@@ -30,8 +30,14 @@ class TrainerController extends Controller
             ->orderBy('start_time')
             ->get();
 
+        // Bez trenéra, jehož profil je právě otevřený — ve sdíleném bloku
+        // by se jinak objevil podruhé hned pod svým vlastním detailem.
+        $trainers = $this->allTrainers($trainer->id);
+
+        $homepageGallery = $this->homepageGallery();
+
         $partner = $this->activePartner();
 
-        return view('public.trainers.show', compact('trainer', 'courses', 'partner'));
+        return view('public.trainers.show', compact('trainer', 'courses', 'trainers', 'homepageGallery', 'partner'));
     }
 }

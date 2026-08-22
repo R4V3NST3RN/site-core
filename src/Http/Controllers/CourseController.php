@@ -24,9 +24,13 @@ class CourseController extends Controller
             ->orderBy('auto_title')
             ->paginate(12);
 
+        $trainers = $this->allTrainers();
+
+        $homepageGallery = $this->homepageGallery();
+
         $partner = $this->activePartner();
 
-        return view('public.courses.index', compact('courses', 'courseTypes', 'partner'));
+        return view('public.courses.index', compact('courses', 'courseTypes', 'trainers', 'homepageGallery', 'partner'));
     }
 
     public function show(string $typeSlug, string $courseSlug)
@@ -45,8 +49,12 @@ class CourseController extends Controller
 
         ['previous' => $previous, 'next' => $next] = $this->feed->neighbours($course);
 
+        $trainers = $this->allTrainers();
+
+        $homepageGallery = $this->homepageGallery();
+
         $partner = $this->activePartner();
 
-        return view('public.courses.show', compact('course', 'related', 'previous', 'next', 'partner'));
+        return view('public.courses.show', compact('course', 'related', 'previous', 'next', 'trainers', 'homepageGallery', 'partner'));
     }
 }
