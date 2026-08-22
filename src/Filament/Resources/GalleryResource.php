@@ -109,7 +109,15 @@ class GalleryResource extends Resource
                             // Připisujeme na konec, takže pořadí ani obsah
                             // stávajících řádků zůstává tak, jak si ho redaktor srovnal.
                             $photos[(string) Str::uuid()] = [
-                                'image' => $path,
+                                // Stav FileUploadu uvnitř formuláře NENÍ cesta, ale pole
+                                // klíčované uuid — tak si ho staví sám v
+                                // BaseFileUpload::afterStateHydrated (mapWithKeys). Holý
+                                // řetězec tu shodí vykreslení řádku na foreach() nad
+                                // řetězcem. Dodáváme ten tvar rovnou, protože Repeater
+                                // dětem stav nere-hydratuje — jen naklonuje schema.
+                                // Na řetězcovou cestu se to při ukládání dehydratuje samo,
+                                // takže v DB zůstává tvar beze změny.
+                                'image' => [(string) Str::uuid() => $path],
                                 'caption' => trim($title.' '.($offset + $index + 1).'/'.$total),
                             ];
                         }
