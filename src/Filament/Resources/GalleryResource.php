@@ -66,6 +66,66 @@ class GalleryResource extends Resource
                     ->helperText('Náhled do výpisu galerií. Ořízne se na poměr 4:3 — u fotek na výšku si vyberte výřez.')
                     ->columnSpanFull(),
 
+                // Vstupní pole, ne sloupec: dehydrated(false) drží 'bulk_photos'
+                // mimo model, jediným zdrojem pravdy o fotkách zůstává Repeater
+                // pod ním. Disk i adresář musí sedět s Repeaterem, jinak by část
+                // fotek jedné galerie skončila mimo veřejné úložiště.
+                Forms\Components\FileUpload::make('bulk_photos')
+                    ->label('Nahrát fotky hromadně')
+                    ->multiple()
+                    ->image()
+                    ->disk('public')
+                    ->directory('galleries')
+                    ->dehydrated(false)
+                    // Bez názvu galerie by z popisku zbylo holé "5/7", proto se
+                    // pole otevře až s ním — 'title' je ->live(), překreslí se samo.
+                    ->disabled(fn (Forms\Get $get): bool => blank($get('title')))
+                    ->helperText(fn (Forms\Get $get): string => blank($get('title'))
+                        ? 'Nejdřív vyplňte název galerie — popisky nahraných fotek se skládají z něj a z pořadí.'
+                        : 'Vyberte víc fotek najednou. Přidají se dolů mezi Fotky s předvyplněným popiskem, který tam můžete upravit.')
+                    ->afterStateUpdated(function (Forms\Components\FileUpload $component, Forms\Get $get, Forms\Set $set): void {
+                        // Livewire drží čerstvě nahrané soubory jako dočasné;
+                        // tohle je přesune na disk a nechá ve stavu cesty, se
+                        // kterými už umí pracovat Repeater.
+                        $component->saveUploadedFiles();
+
+                        $uploaded = array_values(array_filter((array) $component->getState()));
+
+                        if ($uploaded === []) {
+                            return;
+                        }
+
+                        $photos = (array) $get('photos');
+
+                        // Počítá se jen řádek, který má fotku: Repeater začíná
+                        // s jedním prázdným (defaultItems), a ten by jinak první
+                        // dávku do nové galerie posunul na "2/4" místo "1/3".
+                        $offset = count(array_filter($photos, fn ($photo): bool => filled($photo['image'] ?? null)));
+                        $total = $offset + count($uploaded);
+                        $title = trim((string) $get('title'));
+
+                        foreach ($uploaded as $index => $path) {
+                            // Klíč musí být uuid, jinak Repeater řádek nepozná.
+                            // Připisujeme na konec, takže pořadí ani obsah
+                            // stávajících řádků zůstává tak, jak si ho redaktor srovnal.
+                            $photos[(string) Str::uuid()] = [
+                                'image' => $path,
+                                'caption' => trim($title.' '.($offset + $index + 1).'/'.$total),
+                            ];
+                        }
+
+                        // Jmenovatel je počet fotek PO dávce, takže dřívější řádky
+                        // zůstanou s nižším ("4/4" vedle "5/7"). Nepřečíslováváme je
+                        // schválně: popisky si redaktor ručně upravuje a hromadný
+                        // přepis by mu tu práci pokaždé zahodil.
+                        $set('photos', $photos);
+
+                        // Bez vyprázdnění by se fotky z téhle dávky připsaly znovu
+                        // při každém dalším nahrání.
+                        $set('bulk_photos', []);
+                    })
+                    ->columnSpanFull(),
+
                 Forms\Components\Repeater::make('photos')
                     ->label('Fotky')
                     ->schema([
@@ -83,6 +143,10 @@ class GalleryResource extends Resource
                             ->maxLength(255),
                     ])
                     ->columns(2)
+                    // Bez defaultItems(0) začíná nová galerie s jedním prázdným
+                    // řádkem, jehož 'image' je required — po hromadném nahrání
+                    // ho redaktor musí ručně smazat, jinak formulář neuloží.
+                    ->defaultItems(0)
                     ->reorderable()
                     ->itemLabel(fn (array $state): ?string => filled($state['caption'] ?? null) ? $state['caption'] : null)
                     ->addActionLabel('Přidat fotku')
