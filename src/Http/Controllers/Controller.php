@@ -32,8 +32,8 @@ abstract class Controller
      * Aktivní trenéři v pořadí, v jakém se mají zobrazit.
      *
      * Stejná úvaha jako u activePartner(): dotaz je společný, volba stránky
-     * zůstává na volajícím. Řazení podle 'order' drží ruční pořadí z adminu,
-     * takže se blok trenérů tváří všude stejně.
+     * zůstává na volajícím. Podmínku i řazení drží Trainer::activeOrdered(),
+     * ať se výpis nerozejde s hlavičkou, která se ptá na totéž.
      *
      * $exceptId vynechá jednoho trenéra — na jeho vlastním detailu, aby se
      * ve výpisu neopakoval ten, jehož profil návštěvník právě čte. Bez
@@ -43,9 +43,8 @@ abstract class Controller
      */
     protected function allTrainers(?int $exceptId = null): Collection
     {
-        return Trainer::where('is_active', true)
+        return Trainer::activeOrdered()
             ->when($exceptId !== null, fn ($query) => $query->whereKeyNot($exceptId))
-            ->orderBy('order')
             ->get();
     }
 

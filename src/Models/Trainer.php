@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
@@ -36,6 +37,21 @@ class Trainer extends Model
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
+    /**
+     * Aktivní trenéři v pořadí, v jakém se mají zobrazit.
+     *
+     * Na stejný dotaz se ptají dvě různá místa: sdílená metoda
+     * Controller::allTrainers() (pás trenérů na stránkách) a view composer
+     * hlavičky v AppServiceProvider. Scope je drží pohromadě, aby se
+     * nerozešly — jinak by se stalo, že hlavička ukazuje jiné trenéry
+     * nebo jiné pořadí než blok pod ní.
+     */
+    public function scopeActiveOrdered(Builder $query): Builder
+    {
+        return $query->where('is_active', true)
+            ->orderBy('order');
+    }
 
     // Accessor - celé jméno
     public function getFullNameAttribute(): string

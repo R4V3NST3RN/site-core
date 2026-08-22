@@ -4,7 +4,10 @@ namespace App\Providers;
 
 use App\Console\Commands\SyncCourses;
 use App\Contracts\CourseSyncProvider;
+use App\Models\CourseType;
+use App\Models\Trainer;
 use App\Services\NullSyncProvider;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -51,5 +54,26 @@ class AppServiceProvider extends ServiceProvider
                 SyncCourses::class,
             ]);
         }
+
+        // Hlavička potřebuje typy kurzů a trenéry, ale na rozdíl od
+        // activePartner() se tenhle dotaz NEDÁ nechat na controllerech:
+        // activePartner() plní sekci, která na část stránek záměrně nepatří,
+        // kdežto hlavička je na KAŽDÉ veřejné stránce — i na těch, kam
+        // controllery data vědomě neposílají (blog, galerie, hledání,
+        // kontakt). Vypisovat je tam ručně by znamenalo přidat stejné dva
+        // řádky do každé metody a čekat, kdo je u příští stránky zapomene.
+        //
+        // Composer je líný: uzávěr se zavolá až při vykreslení té konkrétní
+        // šablony, takže Filament admin ani konzole tyhle dotazy nepustí.
+        //
+        // Proměnné se jmenují $navCourseTypes/$navTrainers schválně —
+        // prosté $trainers už do některých stránek posílají controllery
+        // a composer by jim je přepsal.
+        View::composer('public.layout', function ($view): void {
+            $view->with([
+                'navCourseTypes' => CourseType::activeOrdered()->get(),
+                'navTrainers' => Trainer::activeOrdered()->get(),
+            ]);
+        });
     }
 }

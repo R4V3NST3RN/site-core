@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -26,6 +27,19 @@ class CourseType extends Model
         'is_for_children' => 'boolean',
         'is_active' => 'boolean',
     ];
+
+    /**
+     * Aktivní typy kurzů v pořadí, v jakém se mají zobrazit.
+     *
+     * Protějšek Trainer::activeOrdered() — stejná dvojice podmínek, stejný
+     * důvod: dotaz na typy do hlavičky si nesmí žít vlastním životem vedle
+     * ostatních výpisů. Řazení podle 'order' drží ruční pořadí z adminu.
+     */
+    public function scopeActiveOrdered(Builder $query): Builder
+    {
+        return $query->where('is_active', true)
+            ->orderBy('order');
+    }
 
     // Vztah - typ kurzu má mnoho kurzů
     public function courses()
