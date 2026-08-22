@@ -58,6 +58,7 @@ class GalleryResource extends Resource
                     ->image()
                     ->disk('public')
                     ->directory('galleries')
+                    ->imageEditor()
                     ->imageResizeMode('cover')
                     ->imageCropAspectRatio('4:3')
                     ->imageResizeTargetWidth('1200')

@@ -83,9 +83,14 @@ class PartnerResource extends Resource
                     ->label('Zobrazit na webu')
                     ->helperText('Na webu smí být jen jeden partner — zapnutím se příznak zruší u dosud vybraného.'),
 
+                // default(0) tu není kosmetika: prázdný TextInput odchází jako
+                // null a databázový default se uplatní jen tehdy, když sloupec
+                // v INSERTu chybí úplně — bez něj skončí uložení partnera bez
+                // vyplněného pořadí na not-null constraintu.
                 Forms\Components\TextInput::make('order')
                     ->label('Pořadí')
                     ->numeric()
+                    ->default(0)
                     ->helperText('Nepovinné. Uplatní se, až bude partnerů víc.'),
 
                 Forms\Components\Select::make('status')
