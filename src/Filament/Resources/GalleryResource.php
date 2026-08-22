@@ -136,13 +136,19 @@ class GalleryResource extends Resource
                 Forms\Components\Repeater::make('photos')
                     ->label('Fotky')
                     ->schema([
-                        // Bez cropu a resize schválně: fotky se zobrazují tak,
-                        // jak je klient nafotil, ořez patří jen náhledu výše.
+                        // Ořez je k dispozici, ale NEVYNUCENÝ — schválně bez
+                        // imageCropAspectRatio a resize rozměrů, na rozdíl od
+                        // náhledu výše. Na titulce se fotky zobrazují v poměru
+                        // 4:3, takže fotka na výšku se ořízne shora i zdola;
+                        // editor dává redaktorovi možnost výřez si určit sám.
+                        // Kdo ho nepotřebuje, nechá fotku tak, jak ji nafotil.
                         Forms\Components\FileUpload::make('image')
                             ->label('Fotka')
                             ->image()
                             ->disk('public')
                             ->directory('galleries')
+                            ->imageEditor()
+                            ->helperText('Nepovinný ořez: na titulce se fotky zobrazují v poměru 4:3, takže u fotek na výšku se hodí si výřez zvolit ikonou tužky.')
                             ->required(),
 
                         Forms\Components\TextInput::make('caption')
